@@ -3,7 +3,7 @@ Small app with simulation of Ising model in 2D
 
 Plany:
  - Wyświetlanie symulacjii
- - Wyświeltanie wykresów z magnetyzacją i energią
+ - Wyświeltanie wykresów ze średnią magnetyzacją i energią
    - oś x przesuwa się w czasie (albo ma suwak?)
    - oś y leży między wyświetlanymi min i max
  - Przycisk zatrzymaj/wznów symulację
