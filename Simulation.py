@@ -8,7 +8,7 @@ class Ising:
 
         """
         self.N = N
-        self.spins_board = np.random.randint(0, 2, (N, N), int) - 1
+        self.spins_board = np.random.randint(0, 2, (N, N), int)*2 - 1
         self.T = 0
         self.outM = 0
         self.step_count = 0
