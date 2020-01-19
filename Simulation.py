@@ -3,14 +3,14 @@ import numpy as np
 
 class Ising:
 
-    def __init__(self, N, T=0, outM=0):
+    def __init__(self, N):
         """
 
         """
         self.N = N
         self.spins_board = np.random.randint(0, 2, (N, N), int) - 1
-        self.T = T
-        self.outM = outM
+        self.T = 0
+        self.outM = 0
         self.step_count = 0
 
     @property
