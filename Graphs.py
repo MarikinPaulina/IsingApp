@@ -20,103 +20,99 @@ class Update(object):
     
     
 class PlotsFrame(tk.Frame):
-    def __init__(self, master, *args,**kwargs):
+    def __init__(self, master, last, *args,**kwargs):
         tk.Frame.__init__(self, master, *args,**kwargs)
-        self.plots_fig, self.plots_ax = plt.subplots(3, 1, figsize=(6, 3), dpi=100, frameon=False)
-        self.canvas_energy = FigureCanvasTkAgg(self.figure_energy, master=self)
-        self.ax_energy.set_title('Energy in time')
-        self.ax_energy.plot([] ,[] ,marker='', linestyle='solid')
-        self.canvas_energy.get_tk_widget().grid(row=0,column=0,sticky="nsew")
+        self.last = last
+        self.i = 0
+
+        self.fig, self.axes = plt.subplots(2, 1, figsize=(6, 3), dpi=100, frameon=False)
+        FigureCanvasTkAgg(self.fig, master=master).\
+            get_tk_widget().pack(side=tk.BOTTOM, fill="both", expand=True)
+
+        self.plots = {}
+        labels = ['E', 'M']
+        for i, ax in enumerate(self.axes):
+            ax.set_ylabel(labels[i])
+            ax.set_autoscale_on(True)
+            plot, = ax.plot([], [], '.-')
+            self.plots[labels[i]] = plot
+        self.axes[-1].set_xlabel('t')
+
+        self.time = []
+        self.data = {'E': [],
+                     'M': []}
+
+    def update(self, ising):
+        self.time.append(self.i)
+        self.data['E'].append(ising.getEnergy())
+        self.data['M'].append(ising.getMagnification())
+        self.i += 1
+
+        self.data['E'] = self.data['E'][-self.last:]
+        self.data['M'] = self.data['M'][-self.last:]
+        self.time = self.time[-self.last:]
+
+        self.plots['E'].set_xdata(self.time)
+        self.plots['E'].set_ydata(self.data['E'])
+        self.plots['M'].set_xdata(self.time)
+        self.plots['M'].set_ydata(self.data['M'])
+
+        # self.axes[0].set_ylim(0,200)
+
+        self.fig.canvas.draw()
 
 
 class Main(tk.Frame):
     def __init__(self, master=None, *args,**kwargs):
         tk.Frame.__init__(self, master, *args,**kwargs)
 
+        last = 100
+        self.working = False
+
+        self.upd = Update()
+
+        self.Time = []
+
+        self.top_container = tk.Frame(self)
+        self.top_container.pack(side="top", fill="both", expand=True)
+
         self.ising = Simulation.Ising(6)
         self.grid_figure, self.grid_ax = plt.subplots(1, 1, figsize=(3, 3), frameon=False)
-        FigureCanvasTkAgg(self.grid_figure, master=self).get_tk_widget().grid(row=0, column=0, sticky='nsew')
+        FigureCanvasTkAgg(self.grid_figure, master=self.top_container).\
+            get_tk_widget().grid(row=0, column=0, sticky='nsew')
         self.imshow = self.grid_ax.imshow(self.ising.spins_board)
 
-        self.last=100
-        self.working=False
+        self.plotsFrame=PlotsFrame(self, last)
+        plt.ion()
         
-        self.upd=Update()
-        
-        self.Time=[]
-        self.i=0
-
-        # self.Main_container=tk.Frame(self)
-        # self.Main_container.pack(side="top",fill="both",expand=True)
-        # self.Main_container.grid_rowconfigure(0,weight=1)
-        # self.Main_container.grid_columnconfigure(0,weight=1)
-        #
-        # self.f_Energy=Energy_Frame(self.Main_container,self)
-        # self.f_Energy.grid(row=0,column=0,sticky="nsew")
-        # self.Energy=[]
-        
-        # self.toolbar=NavigationToolbar2Tk(self.canvas,root)
-        # self.toolbar.update()
-        
-        control_module = tk.Frame(self,width=400,height=400)
+        control_module = tk.Frame(self.top_container, width=400, height=400)
         control_module.grid(row=0, column=1, sticky="nsew")
         tk.Label(control_module, text="Red", bg="red", fg="white").pack(fill=tk.BOTH)
         tk.Label(control_module, text="Green", bg="green", fg="black").pack(fill=tk.BOTH)
         tk.Label(control_module, text="Blue", bg="blue", fg="white").pack(fill=tk.BOTH)
-        #
-        # f2 = tk.Frame(self.Main_container,self,width=400,height=400)
-        # f2.grid(row=1, column=1,sticky="nsew")
-        # tk.Label(f2, text="First").grid(row=0, sticky=tk.W)
-        # tk.Label(f2, text="Second").grid(row=1, sticky=tk.W)
-        #
-        # e1 = tk.Entry(f2)
-        # e2 = tk.Entry(f2)
+        # tk.Label(control_module, text="First").grid(row=0, sticky=tk.W)
+        # tk.Label(control_module, text="Second").grid(row=1, sticky=tk.W)
+        # e1 = tk.Entry(control_module)
+        # e2 = tk.Entry(control_module)
         # e1.grid(row=0, column=1)
         # e2.grid(row=1, column=1)
-        # plt.ion()
-
-        # f3 = tk.Frame(self,width=400,height=400)
-        # f3.grid(row=1, column=1,sticky="nsew")
         self.plotbutton=tk.Button(control_module, text="plot", command=lambda: self.click())
         self.plotbutton.pack(side=tk.RIGHT, fill=tk.BOTH)
-        
-        
+
     def click(self):   
-        if self.working==False:
+        if not self.working:
             self.working=True
             self.after(0,self.update_plot)
-            
         else:
             self.working=False
-       
-        
+
     def update_plot(self):
         if self.working:
             self.ising.step()
             self.imshow.set_data(self.ising.spins_board)
             self.grid_figure.canvas.draw()
 
-            # self.f_Energy.ax_energy.clear()
-            # self.f_Energy.Energy.append(self.upd.getEnergy())
-            self.f_Temp.ax_temp.clear()
-            self.f_Temp.Temp.append(self.upd.getTemp())
-            self.f_Mag.ax_mag.clear()
-            self.f_Mag.Mag.append(self.upd.getEnergy())
-            self.Time.append(self.i)
-            self.i+=1
-            # En=self.f_Energy.Energy[-self.last:]
-            Tm=self.f_Temp.Temp[-self.last:]
-            Mg=self.f_Mag.Mag[-self.last:]
-            T=self.Time[-self.last:]
-            # self.f_Energy.ax_energy.plot(T,En,marker='o', linestyle='solid',color="green")
-            # self.f_Energy.ax_energy.set_title('Energy in time')
-            # self.f_Energy.canvas_energy.draw()
-            self.f_Temp.ax_temp.plot(T,Tm,marker='o', linestyle='solid',color="blue")
-            self.f_Temp.ax_temp.set_title('Temp in time')
-            self.f_Temp.canvas_temp.draw()
-            self.f_Mag.ax_mag.plot(T,Mg,marker='o', linestyle='solid',color="red")
-            self.f_Mag.ax_mag.set_title('Temp in time')
-            self.f_Mag.canvas_mag.draw()
+            self.plotsFrame.update(self.upd)
             
             self.after(0,self.update_plot)
                    
