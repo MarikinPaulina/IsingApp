@@ -54,6 +54,19 @@ class PlotsFrame(tk.Frame):
         self.time = self.time[-self.last:]
 
 
+class SpinsGrid(tk.Frame):
+    def __init__(self, master, ising, *args,**kwargs):
+        tk.Frame.__init__(self, master, *args,**kwargs)
+
+        self.figure, self.ax = plt.subplots(1, 1, figsize=(3, 3), frameon=False)
+        FigureCanvasTkAgg(self.figure, master=master). \
+            get_tk_widget().grid(row=0, column=0, sticky='nsew')
+        self.imshow = self.ax.imshow(ising.spins_board)
+
+    def update(self, ising):
+        self.imshow.set_data(ising.spins_board)
+        self.figure.canvas.draw()
+
 class Main(tk.Frame):
     def __init__(self, master=None, *args,**kwargs):
         tk.Frame.__init__(self, master, *args,**kwargs)
@@ -67,10 +80,8 @@ class Main(tk.Frame):
         self.top_container.pack(side="top", fill="both", expand=True)
 
         self.ising = Simulation.Ising(32)
-        self.grid_figure, self.grid_ax = plt.subplots(1, 1, figsize=(3, 3), frameon=False)
-        FigureCanvasTkAgg(self.grid_figure, master=self.top_container).\
-            get_tk_widget().grid(row=0, column=0, sticky='nsew')
-        self.grid_imshow = self.grid_ax.imshow(self.ising.spins_board)
+        self.spins_grid = SpinsGrid(self.top_container, self.ising)
+        self.spins_grid.grid(row=0, column=1, sticky="nsew")
 
         self.plotsFrame=PlotsFrame(self, last)
         plt.ion()
@@ -101,8 +112,7 @@ class Main(tk.Frame):
             # actual simulation step
             self.ising.step()
             # updating grid figure
-            self.grid_imshow.set_data(self.ising.spins_board)
-            self.grid_figure.canvas.draw()
+            self.spins_grid.update(self.ising)
             # updating plots
             self.plotsFrame.update(self.ising)
 
