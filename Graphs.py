@@ -13,6 +13,7 @@ import Simulation
 
 root=tk.Tk()
 
+
 class Update(object):
     def getTemp(self): return random.randint(0,50)
     def getEnergy(self): return random.randint(50,100)
@@ -25,12 +26,12 @@ class PlotsFrame(tk.Frame):
         self.last = last
         self.i = 0
 
-        self.fig, self.axes = plt.subplots(2, 1, figsize=(6, 3), dpi=100, frameon=False)
+        self.fig, self.axes = plt.subplots(2, 1, figsize=(6, 3), dpi=100, sharex=True, frameon=False)
         FigureCanvasTkAgg(self.fig, master=master).\
             get_tk_widget().pack(side=tk.BOTTOM, fill="both", expand=True)
 
         self.plots = {}
-        labels = ['E', 'M']
+        labels = ['E', 'B']
         for i, ax in enumerate(self.axes):
             ax.set_ylabel(labels[i])
             ax.set_autoscale_on(True)
@@ -40,26 +41,17 @@ class PlotsFrame(tk.Frame):
 
         self.time = []
         self.data = {'E': [],
-                     'M': []}
+                     'B': []}
 
     def update(self, ising):
         self.time.append(self.i)
-        self.data['E'].append(ising.getEnergy())
-        self.data['M'].append(ising.getMagnification())
+        self.data['E'].append(ising.energy)
+        self.data['B'].append(ising.magnetic_field)
         self.i += 1
 
         self.data['E'] = self.data['E'][-self.last:]
-        self.data['M'] = self.data['M'][-self.last:]
+        self.data['B'] = self.data['B'][-self.last:]
         self.time = self.time[-self.last:]
-
-        self.plots['E'].set_xdata(self.time)
-        self.plots['E'].set_ydata(self.data['E'])
-        self.plots['M'].set_xdata(self.time)
-        self.plots['M'].set_ydata(self.data['M'])
-
-        # self.axes[0].set_ylim(0,200)
-
-        self.fig.canvas.draw()
 
 
 class Main(tk.Frame):
@@ -69,18 +61,16 @@ class Main(tk.Frame):
         last = 100
         self.working = False
 
-        self.upd = Update()
-
         self.Time = []
 
         self.top_container = tk.Frame(self)
         self.top_container.pack(side="top", fill="both", expand=True)
 
-        self.ising = Simulation.Ising(6)
+        self.ising = Simulation.Ising(32)
         self.grid_figure, self.grid_ax = plt.subplots(1, 1, figsize=(3, 3), frameon=False)
         FigureCanvasTkAgg(self.grid_figure, master=self.top_container).\
             get_tk_widget().grid(row=0, column=0, sticky='nsew')
-        self.imshow = self.grid_ax.imshow(self.ising.spins_board)
+        self.grid_imshow = self.grid_ax.imshow(self.ising.spins_board)
 
         self.plotsFrame=PlotsFrame(self, last)
         plt.ion()
@@ -108,12 +98,38 @@ class Main(tk.Frame):
 
     def update_plot(self):
         if self.working:
+            # actual simulation step
             self.ising.step()
-            self.imshow.set_data(self.ising.spins_board)
+            # updating grid figure
+            self.grid_imshow.set_data(self.ising.spins_board)
             self.grid_figure.canvas.draw()
+            # updating plots
+            self.plotsFrame.update(self.ising)
 
-            self.plotsFrame.update(self.upd)
-            
+            # self.f_Energy.ax_energy.clear()
+            # self.f_Energy.Energy.append(self.upd.getEnergy())
+            # self.f_Temp.ax_temp.clear()
+            # self.f_Temp.Temp.append(self.upd.getTemp())
+            # self.f_Mag.ax_mag.clear()
+            # self.f_Mag.Mag.append(self.upd.getEnergy())
+            # self.Time.append(self.i)
+            # self.i += 1
+            # En = self.f_Energy.Energy[-self.last:]
+            # En=self.f_Energy.Energy[-self.last:]
+            # Tm = self.f_Temp.Temp[-self.last:]
+            # Mg = self.f_Mag.Mag[-self.last:]
+            # T = self.Time[-self.last:]
+            # self.f_Energy.ax_energy.plot(T, En, marker='o', linestyle='solid', color="green")
+            # self.f_Energy.ax_energy.set_title('Energy in time')
+            # self.f_Energy.canvas_energy.draw()
+            # self.f_Energy.ax_energy.plot(T,En,marker='o', linestyle='solid',color="green")
+            # self.f_Energy.ax_energy.set_title('Energy in time')
+            # self.f_Energy.canvas_energy.draw()
+            # self.f_Temp.ax_temp.plot(T, Tm, marker='o', linestyle='solid', color="blue")
+            # self.f_Temp.ax_temp.set_title('Temp in time')
+            # self.f_Temp.canvas_temp.draw()
+
+
             self.after(0,self.update_plot)
                    
 
