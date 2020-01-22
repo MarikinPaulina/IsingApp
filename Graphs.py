@@ -77,15 +77,15 @@ class Main(tk.Frame):
         
         control_module = tk.Frame(self.top_container, width=400, height=400)
         control_module.grid(row=0, column=1, sticky="nsew")
-        tk.Label(control_module, text="Red", bg="red", fg="white").pack(fill=tk.BOTH)
-        tk.Label(control_module, text="Green", bg="green", fg="black").pack(fill=tk.BOTH)
-        tk.Label(control_module, text="Blue", bg="blue", fg="white").pack(fill=tk.BOTH)
-        # tk.Label(control_module, text="First").grid(row=0, sticky=tk.W)
-        # tk.Label(control_module, text="Second").grid(row=1, sticky=tk.W)
-        # e1 = tk.Entry(control_module)
-        # e2 = tk.Entry(control_module)
-        # e1.grid(row=0, column=1)
-        # e2.grid(row=1, column=1)
+        f2 = tk.Frame(control_module, width=400, height=400)
+        f2.pack()
+        tk.Label(f2, text="N").grid(row=0, column=0, sticky=tk.W)
+        tk.Label(f2, text="Temp").grid(row=0, column=2, sticky=tk.W)
+
+        e1 = tk.Entry(f2)
+        e2 = tk.Entry(f2)
+        e1.grid(row=0, column=1)
+        e2.grid(row=0, column=3)
         self.plotbutton=tk.Button(control_module, text="plot", command=lambda: self.click())
         self.plotbutton.pack(side=tk.RIGHT, fill=tk.BOTH)
 
@@ -108,26 +108,14 @@ class Main(tk.Frame):
 
             # self.f_Energy.ax_energy.clear()
             # self.f_Energy.Energy.append(self.upd.getEnergy())
-            # self.f_Temp.ax_temp.clear()
-            # self.f_Temp.Temp.append(self.upd.getTemp())
             # self.f_Mag.ax_mag.clear()
-            # self.f_Mag.Mag.append(self.upd.getEnergy())
             # self.Time.append(self.i)
             # self.i += 1
             # En = self.f_Energy.Energy[-self.last:]
-            # En=self.f_Energy.Energy[-self.last:]
-            # Tm = self.f_Temp.Temp[-self.last:]
-            # Mg = self.f_Mag.Mag[-self.last:]
+            #
             # T = self.Time[-self.last:]
             # self.f_Energy.ax_energy.plot(T, En, marker='o', linestyle='solid', color="green")
-            # self.f_Energy.ax_energy.set_title('Energy in time')
             # self.f_Energy.canvas_energy.draw()
-            # self.f_Energy.ax_energy.plot(T,En,marker='o', linestyle='solid',color="green")
-            # self.f_Energy.ax_energy.set_title('Energy in time')
-            # self.f_Energy.canvas_energy.draw()
-            # self.f_Temp.ax_temp.plot(T, Tm, marker='o', linestyle='solid', color="blue")
-            # self.f_Temp.ax_temp.set_title('Temp in time')
-            # self.f_Temp.canvas_temp.draw()
 
 
             self.after(0,self.update_plot)
