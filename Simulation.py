@@ -15,7 +15,6 @@ class Ising:
         """
 
         """
-        self.N = N
         self.spins_board = self.set_spins_board(N)
         self.T_crit = 2/np.log(1 + 2**0.5)
         self.T = self.T_crit
@@ -50,14 +49,14 @@ class Ising:
 
     @property
     def average_energy(self):
-        return self.energy / self.N**2
+        return self.energy / self.spins_board.size
 
     def _magnetization(self):
         return self.spins_board.sum()
 
     @property
     def average_magnetization(self):
-        return self.magnetization / self.N ** 2
+        return self.magnetization / self.spins_board.size
 
     @property
     def H_board(self):
@@ -67,17 +66,15 @@ class Ising:
         return h
 
     def _H(self, i, j):
-        neighbours = self.spins_board[(i+1) % self.N, j] + self.spins_board[(i-1) % self.N, j] + \
-                     self.spins_board[i, (j+1) % self.N] + self.spins_board[i, (j-1) % self.N]
+        N = self.spins_board.shape[0]
+        neighbours = self.spins_board[(i+1) % N, j] + self.spins_board[(i-1) % N, j] + \
+                     self.spins_board[i, (j+1) % N] + self.spins_board[i, (j-1) % N]
         h = -self.spins_board[i, j] * neighbours
         return h
 
-    def reset(self):
-        self.spins_board = np.random.randint(0, 2, (self.N, self.N), int) - 1
-
     def step(self):
         self.step_count += 1
-        x, y = np.random.randint(0, self.N, 2)
+        x, y = np.random.randint(0, self.spins_board.shape[0], 2)
         delta_energy, acceptance = self._random_acceptance(x, y)
         if acceptance:
             self.spins_board[x, y] *= -1
