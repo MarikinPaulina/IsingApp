@@ -46,7 +46,7 @@ class PlotsFrame(tk.Frame):
     def update(self, ising):
         self.time.append(self.i)
         self.data['E'].append(ising.energy)
-        self.data['B'].append(ising.magnetic_field)
+        self.data['B'].append(ising.magnetization)
         self.i += 1
 
         self.data['E'] = self.data['E'][-self.last:]
