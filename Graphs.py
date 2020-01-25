@@ -61,7 +61,10 @@ class SpinsGrid(tk.Frame):
         self.figure, self.ax = plt.subplots(1, 1, figsize=(3, 3), frameon=False)
         FigureCanvasTkAgg(self.figure, master=master). \
             get_tk_widget().grid(row=0, column=0, sticky='nsew')
-        self.imshow = self.ax.imshow(ising.spins_board)
+        self.imshow = self.ax.imshow(ising.spins_board,
+                                     vmin=-1,   # default: spins_board.min(),
+                                     vmax=1,    # default: spins_board.max(),
+                                     )
 
     def update(self, ising):
         self.imshow.set_data(ising.spins_board)
