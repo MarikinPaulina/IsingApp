@@ -1,24 +1,11 @@
 import tkinter as tk
-import numpy as np
-import random
-from pandas import DataFrame
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-import tkinter.ttk as ttk
-import sys
-import threading
-import time
-import Simulation
+    FigureCanvasTkAgg)
+from SimpleIsingApp import Simulation
 
 root=tk.Tk()
 
-
-class Update(object):
-    def getTemp(self): return random.randint(0,50)
-    def getEnergy(self): return random.randint(50,100)
-    def getMagnification(self): return random.randint(100,150)
-    
     
 class PlotsFrame(tk.Frame):
     def __init__(self, master, last, *args,**kwargs):
@@ -133,8 +120,7 @@ class Main(tk.Frame):
 
             self.after(0,self.update_plot)
                    
-
-if __name__=='__main__':
+def main_entrypoint():
     #Main(root).pack(side="top",fill="both",expand=True)
     # root.after(0,Main(root).grid(row=1,column=1,sticky="nsew"))
     Main(root).pack()
@@ -142,3 +128,6 @@ if __name__=='__main__':
     #app=Main(master=root)
     #app.mainloop()
 
+
+if __name__=='__main__':
+    main_entrypoint()

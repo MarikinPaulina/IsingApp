@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import numpy as np
-import Simulation
+from SimpleIsingApp import Simulation
 
 
 def test_magnetised_hot():

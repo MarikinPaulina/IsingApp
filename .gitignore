@@ -1,3 +1,5 @@
 # pliki PyCharma
 .idea/
 __pychache__/
+# egg-info
+*.egg-info
