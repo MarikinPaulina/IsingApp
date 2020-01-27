@@ -6,24 +6,24 @@ from SimpleIsingApp import Simulation
 
 root=tk.Tk()
 
-    
+
 class PlotsFrame(tk.Frame):
-    def __init__(self, master, last, *args,**kwargs):
-        tk.Frame.__init__(self, master, *args,**kwargs)
+    def __init__(self, master, last, *args, **kwargs):
+        tk.Frame.__init__(self, master, *args, **kwargs)
         self.last = last
         self.i = 0
 
         self.fig, self.axes = plt.subplots(2, 1, figsize=(6, 3), dpi=100, sharex=True, frameon=False)
-        FigureCanvasTkAgg(self.fig, master=master).\
+        FigureCanvasTkAgg(self.fig, master=master). \
             get_tk_widget().pack(side=tk.BOTTOM, fill="both", expand=True)
-
         self.plots = {}
-        labels = ['E', 'B']
+        self.labels = ['E', 'B']
         for i, ax in enumerate(self.axes):
-            ax.set_ylabel(labels[i])
+            ax.set_ylabel(self.labels[i])
             ax.set_autoscale_on(True)
             plot, = ax.plot([], [], '.-')
-            self.plots[labels[i]] = plot
+            self.plots[self.labels[i]] = plot
+
         self.axes[-1].set_xlabel('t')
 
         self.time = []
@@ -31,14 +31,18 @@ class PlotsFrame(tk.Frame):
                      'B': []}
 
     def update(self, ising):
+        for i, ax in enumerate(self.axes):
+            ax.clear()
+            ax.set_ylabel(self.labels[i])
         self.time.append(self.i)
         self.data['E'].append(ising.energy)
         self.data['B'].append(ising.magnetization)
         self.i += 1
-
         self.data['E'] = self.data['E'][-self.last:]
         self.data['B'] = self.data['B'][-self.last:]
         self.time = self.time[-self.last:]
+        self.axes[0].plot(self.time, self.data['E'], marker='o', linestyle='solid', color="green")
+        self.axes[1].plot(self.time, self.data['B'], marker='o', linestyle='solid', color="red")
 
 
 class SpinsGrid(tk.Frame):
@@ -57,6 +61,7 @@ class SpinsGrid(tk.Frame):
         self.imshow.set_data(ising.spins_board)
         self.figure.canvas.draw()
 
+
 class Main(tk.Frame):
     def __init__(self, master=None, *args,**kwargs):
         tk.Frame.__init__(self, master, *args,**kwargs)
@@ -65,7 +70,7 @@ class Main(tk.Frame):
         self.working = False
 
         self.Time = []
-
+        self.N = 32
         self.top_container = tk.Frame(self)
         self.top_container.pack(side="top", fill="both", expand=True)
 
@@ -75,20 +80,36 @@ class Main(tk.Frame):
 
         self.plotsFrame=PlotsFrame(self, last)
         plt.ion()
-        
+
         control_module = tk.Frame(self.top_container, width=400, height=400)
         control_module.grid(row=0, column=1, sticky="nsew")
         f2 = tk.Frame(control_module, width=400, height=400)
-        f2.pack()
-        tk.Label(f2, text="N").grid(row=0, column=0, sticky=tk.W)
-        tk.Label(f2, text="Temp").grid(row=0, column=2, sticky=tk.W)
+        f2.pack(side=tk.TOP, fill=tk.X)
 
-        e1 = tk.Entry(f2)
-        e2 = tk.Entry(f2)
-        e1.grid(row=0, column=1)
-        e2.grid(row=0, column=3)
-        self.plotbutton=tk.Button(control_module, text="plot", command=lambda: self.click())
-        self.plotbutton.pack(side=tk.RIGHT, fill=tk.BOTH)
+        # Ustawienie tekstow parametrow razem z wypisaniem obecnych wartowsci
+        temp = "Temp: " + str("%.2f" % (self.ising.T))
+        self.templabel = tk.Label(f2, text=temp).grid(row=0, column=0, sticky=tk.W, padx=20, pady=20)
+        Mag = "Outside_Mag: " + str("%.2f" % (self.ising.outM))
+        self.maglabel = tk.Label(f2, text=Mag).grid(row=1, column=0, sticky=tk.W, padx=20, pady=20)
+        N = "N: " + str(self.N)
+        self.Nlabel = tk.Label(f2, text=N).grid(row=2, column=0, sticky=tk.W, padx=20, pady=20)
+
+        self.e1 = tk.Entry(f2)
+        self.e2 = tk.Entry(f2)
+        self.e3 = tk.Entry(f2)
+        self.e1.grid(row=0, column=1, padx=40, pady=20)
+        self.e2.grid(row=1, column=1, padx=40, pady=20)
+        self.e3.grid(row=2, column=1, padx=40, pady=20)
+
+        # ErrorLabel, w przypadku wpisania zlej wartosci
+        self.errortext = ""
+        self.errorlabel = tk.Label(control_module, text=self.errortext).pack(side=tk.TOP, fill=tk.X, padx=20, pady=0)
+
+        # Przyciski
+        self.setbutton = tk.Button(control_module, text="Set New Parameters", command=lambda: self.set_new_parameters())
+        self.setbutton.pack(side=tk.TOP, fill=tk.X, padx=20, pady=20)
+        self.plotbutton = tk.Button(control_module, text="Plot", command=lambda: self.click())
+        self.plotbutton.pack(side=tk.TOP, fill=tk.X, padx=20, pady=10)
 
     def click(self):   
         if not self.working:
@@ -96,6 +117,13 @@ class Main(tk.Frame):
             self.after(0,self.update_plot)
         else:
             self.working=False
+
+    def set_new_parameters(self):
+        #if isinstance(self.e1.cget("text"),int):
+        #    self.errorlabel['text']=self.e1.cget("text")
+        print(type(self.e1.cget("text")))
+        #else:
+        self.errortext="NOPE"
 
     def update_plot(self):
         if self.working:
@@ -105,18 +133,6 @@ class Main(tk.Frame):
             self.spins_grid.update(self.ising)
             # updating plots
             self.plotsFrame.update(self.ising)
-
-            # self.f_Energy.ax_energy.clear()
-            # self.f_Energy.Energy.append(self.upd.getEnergy())
-            # self.f_Mag.ax_mag.clear()
-            # self.Time.append(self.i)
-            # self.i += 1
-            # En = self.f_Energy.Energy[-self.last:]
-            #
-            # T = self.Time[-self.last:]
-            # self.f_Energy.ax_energy.plot(T, En, marker='o', linestyle='solid', color="green")
-            # self.f_Energy.canvas_energy.draw()
-
 
             self.after(0,self.update_plot)
                    
