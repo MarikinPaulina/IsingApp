@@ -116,7 +116,7 @@ class Ising:
         if acceptance:
             self.spins_board[x, y] *= -1
             self.magnetization += 2 * self.spins_board[x, y]
-            self.energy += delta_energy
+            self.energy = self._energy()
 
     def _random_acceptance(self, i: int, j: int) -> (float, bool):
         delta_energy = - self._H(i, j) * 2
