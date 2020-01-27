@@ -20,7 +20,7 @@ App is divided into three base sections.
  - Upper right corner - control panel
  - Lower segment - Energy and magnetisation plots
  
-You can start/stop simulation by clicking *plot* button. 
+You can start/stop simulation by clicking `plot` button. 
 To change temperature or outside magnetic field simply type 
 new value in their respective fields and click `set new paramiters`. 
 Temperature must be bigger then 0.
