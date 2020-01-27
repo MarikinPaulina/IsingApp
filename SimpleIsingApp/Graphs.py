@@ -2,7 +2,7 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg)
-from SimpleIsingApp import Simulation
+import Simulation
 
 root=tk.Tk()
 
@@ -78,6 +78,11 @@ class Main(tk.Frame):
         self.spins_grid = SpinsGrid(self.top_container, self.ising)
         self.spins_grid.grid(row=0, column=1, sticky="nsew")
 
+        # Parametry do zmian programu
+        self.N = self.ising.spins_board.shape[0]
+        self.T = self.ising.T
+        self.M = self.ising.outM
+
         self.plotsFrame=PlotsFrame(self, last)
         plt.ion()
 
@@ -86,13 +91,19 @@ class Main(tk.Frame):
         f2 = tk.Frame(control_module, width=400, height=400)
         f2.pack(side=tk.TOP, fill=tk.X)
 
-        # Ustawienie tekstow parametrow razem z wypisaniem obecnych wartowsci
-        temp = "Temp: " + str("%.2f" % (self.ising.T))
-        self.templabel = tk.Label(f2, text=temp).grid(row=0, column=0, sticky=tk.W, padx=20, pady=20)
-        Mag = "Outside_Mag: " + str("%.2f" % (self.ising.outM))
-        self.maglabel = tk.Label(f2, text=Mag).grid(row=1, column=0, sticky=tk.W, padx=20, pady=20)
-        N = "N: " + str(self.N)
-        self.Nlabel = tk.Label(f2, text=N).grid(row=2, column=0, sticky=tk.W, padx=20, pady=20)
+        #Ustawienie tekstow parametrow razem z wypisaniem obecnych wartowsci
+        self.strtemp=tk.StringVar()
+        self.strtemp.set('Temp: '+str('%.2f' % (self.ising.T)))
+        self.templabel=tk.Label(f2, text=self.strtemp.get())
+        self.templabel.grid(row=0, column=0, sticky=tk.W, padx=20, pady=20)
+        self.strMag=tk.StringVar()
+        self.strMag.set('Outside_Mag: '+str('%.2f' % (self.ising.outM)))
+        self.maglabel=tk.Label(f2, text=self.strMag.get())
+        self.maglabel.grid(row=1, column=0, sticky=tk.W, padx=20, pady=20)
+        self.strN=tk.StringVar()
+        self.strN.set('N: '+str(self.N))
+        self.Nlabel=tk.Label(f2, text=self.strN.get())
+        self.Nlabel.grid(row=2, column=0, sticky=tk.W, padx=20, pady=20)
 
         self.e1 = tk.Entry(f2)
         self.e2 = tk.Entry(f2)
@@ -102,8 +113,10 @@ class Main(tk.Frame):
         self.e3.grid(row=2, column=1, padx=40, pady=20)
 
         # ErrorLabel, w przypadku wpisania zlej wartosci
-        self.errortext = ""
-        self.errorlabel = tk.Label(control_module, text=self.errortext).pack(side=tk.TOP, fill=tk.X, padx=20, pady=0)
+        self.errortext = tk.StringVar()
+        self.errortext.set("")
+        self.errorlabel = tk.Label(control_module, text=self.errortext.get())
+        self.errorlabel.pack(side=tk.TOP, fill=tk.X, padx=20, pady=0)
 
         # Przyciski
         self.setbutton = tk.Button(control_module, text="Set New Parameters", command=lambda: self.set_new_parameters())
@@ -119,11 +132,55 @@ class Main(tk.Frame):
             self.working=False
 
     def set_new_parameters(self):
-        #if isinstance(self.e1.cget("text"),int):
-        #    self.errorlabel['text']=self.e1.cget("text")
-        print(type(self.e1.cget("text")))
-        #else:
-        self.errortext="NOPE"
+        error = "Blad w wartosci: "
+        errorexist = 0
+        if self.working:
+            self.working = False
+
+        # Dla temeratury
+        try:
+            if self.e1.get() != '' and float(self.e1.get()) != self.T:
+                if float(self.e1.get()) > 0:
+                    self.T = float(self.e1.get())
+                    self.templabel.config(text="Temp: " + str("%.2f" % (self.T)))
+                else:
+                    errorexist = 1
+                    error += "Temperatury  "
+                    # self.errorlabel.config(text="Temperaturze")
+        except ValueError:
+            errorexist = 1
+            error += "Temperatury  "
+
+        # Dla zewnetrznej magnetyzacji
+        try:
+            if self.e2.get() != '' and float(self.e2.get()) != self.M:
+                self.M = float(self.e2.get())
+                self.maglabel.config(text="Outside_Mag: " + str("%.2f" % (self.M)))
+        except ValueError:
+            errorexist = 1
+            error += "Outside_Mag  "
+
+        # Dla N
+        try:
+            if self.e3.get() != '' and int(self.e3.get()) != self.N:
+                if int(self.e3.get()) > 0 and int(self.e3.get()) < 32:
+                    self.N = int(self.e3.get())
+                    self.Nlabel.config(text="N: " + str("%.2f" % (self.N)))
+                    self.spins_grid.ax.clear()
+                    self.ising.set_spins_board(self.N)
+                else:
+                    errorexist = 1
+                    error += "N  "
+                    # self.errorlabel.config(text="Temperaturze")
+        except ValueError:
+            errorexist = 1
+            error += "N  "
+
+        # Sprawdzenie czy zaszly jakies problemy z wartosciami
+        if errorexist == 1:
+            self.errorlabel.config(text=error)
+        else:
+            self.errorlabel.config(text="")
 
     def update_plot(self):
         if self.working:
