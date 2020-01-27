@@ -88,7 +88,7 @@ class Ising:
         """Calculates energy for every spin"""
         neighbours = np.roll(self.spins_board, 1, 0) + np.roll(self.spins_board, -1, 0) + \
             np.roll(self.spins_board, 1, 1) + np.roll(self.spins_board, -1, 1)
-        h = -self.spins_board * neighbours
+        h = -self.spins_board * (neighbours + self.outM)
         return h
 
     def _H(self, i: int, j: int) -> float:
@@ -96,7 +96,7 @@ class Ising:
         N = self.spins_board.shape[0]
         neighbours = self.spins_board[(i+1) % N, j] + self.spins_board[(i-1) % N, j] + \
                      self.spins_board[i, (j+1) % N] + self.spins_board[i, (j-1) % N]
-        h = -self.spins_board[i, j] * neighbours
+        h = -self.spins_board[i, j] * (neighbours + self.outM)
         return h
 
     def step(self):
