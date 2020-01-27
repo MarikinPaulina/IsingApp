@@ -2,7 +2,7 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg)
-import Simulation
+from SimpleIsingApp import Simulation
 
 root=tk.Tk()
 
@@ -93,7 +93,7 @@ class Main(tk.Frame):
 
         #Ustawienie tekstow parametrow razem z wypisaniem obecnych wartowsci
         self.strtemp=tk.StringVar()
-        self.strtemp.set('Temp: '+str('%.2f' % (self.ising.T)))
+        self.strtemp.set('Temp: '+str('%.6f' % (self.ising.T)))
         self.templabel=tk.Label(f2, text=self.strtemp.get())
         self.templabel.grid(row=0, column=0, sticky=tk.W, padx=20, pady=20)
         self.strMag=tk.StringVar()
@@ -111,6 +111,22 @@ class Main(tk.Frame):
         self.e1.grid(row=0, column=1, padx=40, pady=20)
         self.e2.grid(row=1, column=1, padx=40, pady=20)
         self.e3.grid(row=2, column=1, padx=40, pady=20)
+
+        self.strspin = "Lista plansz"
+        self.spinlabel = tk.Label(f2, text=self.strspin)
+        self.spinlabel.grid(row=3, column=0, sticky=tk.W, padx=20, pady=10)
+
+        self.listbox = tk.Listbox(f2, height=5)
+        self.listbox.grid(row=3, column=1, sticky=tk.W, padx=40, pady=10)
+        self.listbox.insert(1, Simulation.board_setups[0])
+        self.listbox.insert(2, Simulation.board_setups[1])
+        self.listbox.insert(3, Simulation.board_setups[2])
+        self.listbox.insert(4, Simulation.board_setups[3])
+        self.listbox.insert(5, Simulation.board_setups[4])
+        self.listbox.selection_set(0)
+        self.listbox.see(0)
+        self.listbox.activate(0)
+        self.listbox.selection_anchor(0)
 
         # ErrorLabel, w przypadku wpisania zlej wartosci
         self.errortext = tk.StringVar()
@@ -142,6 +158,7 @@ class Main(tk.Frame):
             if self.e1.get() != '' and float(self.e1.get()) != self.T:
                 if float(self.e1.get()) > 0:
                     self.T = float(self.e1.get())
+                    self.ising.T = self.T
                     self.templabel.config(text="Temp: " + str("%.2f" % (self.T)))
                 else:
                     errorexist = 1
@@ -155,23 +172,50 @@ class Main(tk.Frame):
         try:
             if self.e2.get() != '' and float(self.e2.get()) != self.M:
                 self.M = float(self.e2.get())
+                self.ising.outM = self.M
                 self.maglabel.config(text="Outside_Mag: " + str("%.2f" % (self.M)))
         except ValueError:
             errorexist = 1
             error += "Outside_Mag  "
 
         # Dla N
+
+        boxlist = self.ising.board
+
+        checklist = self.listbox.curselection()
+        if checklist:
+            boxlist = self.listbox.get(self.listbox.curselection())
         try:
-            if self.e3.get() != '' and int(self.e3.get()) != self.N:
-                if int(self.e3.get()) > 0 and int(self.e3.get()) < 32:
-                    self.N = int(self.e3.get())
-                    self.Nlabel.config(text="N: " + str("%.2f" % (self.N)))
-                    self.spins_grid.ax.clear()
-                    self.ising.set_spins_board(self.N)
+            value = 0
+            if self.e3.get() != '':
+                value = int(self.e3.get())
+            if value > 0 and boxlist != self.ising.board:
+                self.N = value
+                self.ising.board = boxlist
+                self.Nlabel.config(text="N: " + str((self.N)))
+                self.ising.spins_board = self.ising.set_spins_board(value, boxlist)
+                self.spins_grid.update(self.ising)
+                self.spins_grid.imshow = self.spins_grid.ax.imshow(self.ising.spins_board,
+                                                                   vmin=-1,  # default: spins_board.min(),
+                                                                   vmax=1,  # default: spins_board.max(),
+                                                                   )
+                self.plotsFrame.clean()
+            else:
+                if self.e3.get() == '' and boxlist != self.ising.board:
+                    self.ising.board = boxlist
+                    self.ising.spins_board = self.ising.set_spins_board(self.N, boxlist)
+                    self.spins_grid.update(self.ising)
+                    self.spins_grid.imshow = self.spins_grid.ax.imshow(self.ising.spins_board,
+                                                                       vmin=-1,  # default: spins_board.min(),
+                                                                       vmax=1,  # default: spins_board.max(),
+                                                                       )
+                    self.plotsFrame.clean()
                 else:
-                    errorexist = 1
-                    error += "N  "
-                    # self.errorlabel.config(text="Temperaturze")
+                    if value == self.N or boxlist == self.ising.board:
+                        pass
+                    else:
+                        errorexist = 1
+                        error += "N  "
         except ValueError:
             errorexist = 1
             error += "N  "
