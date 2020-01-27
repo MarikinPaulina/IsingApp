@@ -1,20 +1,30 @@
 ## IsingApp
-Small app in Python with simulation of Ising model on square lattice made for university project.
-Simulation uses Metropolis-Hasting algorithm (Markov chain Monte Carlo method).
+Small app in Python with simulation of Ising model on 
+square lattice made for university project.
+Simulation uses Metropolis-Hasting algorithm 
+(Markov chain Monte Carlo method).
 
 ## Installation 
 
-
+Program requires python at least 3.6 to run.
+Install by typing: 
+```
+pip install git+https://github.com/MarikinPaulina/IsingApp
+```
+in terminal.
 ## Usage
+To run simply type `SimpleIsingApp`
 
+App is divided into three base sections. 
+ - Upper left corner - spin lattice
+ - Upper right corner - control panel
+ - Lower segment - Energy and magnetisation plots
+ 
+You can start/stop simulation by clicking *plot* button. 
+To change temperature or outside magnetic field... To be contined
 
 Plany:
 
- - Wyświetlanie symulacjii
- - Wyświeltanie wykresów ze średnią magnetyzacją i energią
-   - oś x przesuwa się w czasie (albo ma suwak?)
-   - oś y leży między wyświetlanymi min i max
- - Przycisk zatrzymaj/wznów symulację
  - Reset planszy
    - Różne opcje początkowe
    - Przycisk resetujący
