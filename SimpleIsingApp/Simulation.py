@@ -33,6 +33,7 @@ class Ising:
         self.step_count = 0
         self.energy = self._energy()
         self.magnetization = self._magnetization()
+        self.reseted = False
 
     def set_spins_board(self,
                         N: int,
@@ -44,6 +45,7 @@ class Ising:
         :param board_setup:
         :return: np.array, square array of spines in given state
         """
+        self.reseted = True
         if board_setup == self.board_setups[0]:
             return np.random.randint(0, 2, (N, N), int)*2 - 1
         elif board_setup == self.board_setups[1]:
@@ -116,7 +118,11 @@ class Ising:
         if acceptance:
             self.spins_board[x, y] *= -1
             self.magnetization += 2 * self.spins_board[x, y]
-            self.energy = self._energy()
+            if self.reseted:
+                self.energy = self._energy()
+                self.reseted = False
+            else:
+                self.energy += delta_energy
 
     def _random_acceptance(self, i: int, j: int) -> (float, bool):
         delta_energy = - self._H(i, j) * 2

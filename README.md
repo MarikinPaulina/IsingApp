@@ -21,15 +21,18 @@ App is divided into three base sections.
  - Lower segment - Energy and magnetisation plots
  
 You can start/stop simulation by clicking *plot* button. 
-To change temperature or outside magnetic field... To be contined
+To change temperature or outside magnetic field simply type 
+new value in their respective fields and click `set new paramiters`. 
+Temperature must be bigger then 0.
 
-Plany:
-
- - Reset planszy
-   - Różne opcje początkowe
-   - Przycisk resetujący
-   - Wybór wielkości planszy
- - Coś do manipulacji zewnętrznym polem magnetycznym i temperaturą
+You can also change parameters of lattice namely its size 
+and chose from few initial spin configuration. 
+Those changes as well are apply by clicking `set new paramiters`.
+Changing one (or both) of those resets not only lattice but also
+properties plots.
+Size, as one can guess, must be positive. 
+Also, it shouldn't be too big, since simulation takes some time.
+Values below 64 are completely save and don't affect performance.
 
 ---
 
